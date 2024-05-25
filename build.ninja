@@ -29,7 +29,7 @@ rule link
 build build/obj/BPI_M2_ZERO_UART.o: compile source/test/BPI_M2_ZERO_UART.cpp
 build build/obj/testUART.o: compile source/test/testUART.cpp
 
-build build/bin/testUART: link src/testUART.o  src/BPI_M2_ZERO_UART.o
+build build/bin/testUART: link build/obj/testUART.o  build/obj/BPI_M2_ZERO_UART.o
 
 # Define the default target
 default build/bin/testUART
