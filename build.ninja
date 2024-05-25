@@ -15,8 +15,8 @@ rule cxx
   command = $cxx $cflags -c $in -o $out
   description = Compiling $in
 
-#rule compile
-#  command = g++ -Wall -c $in -o $out
+rule compile
+  command = gxx cflags -c $in -o $out
  
 rule link
   command = cxx $in -o $out
