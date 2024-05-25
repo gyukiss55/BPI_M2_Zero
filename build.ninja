@@ -27,9 +27,9 @@ rule link
   description = Linking $out
 
 build build/obj/BPI_M2_ZERO_UART.o: compile source/common/BPI_M2_ZERO_UART.cpp
-build build/obj/testUART.o: compile source/test/testUART.cpp
+build build/obj/test_UART.o: compile source/test/test_UART.cpp
 
-build build/bin/testUART: link build/obj/testUART.o  build/obj/BPI_M2_ZERO_UART.o
+build build/bin/test_UART: link build/obj/test_UART.o  build/obj/BPI_M2_ZERO_UART.o
 
 # Define the default target
-default build/bin/testUART
+default build/bin/test_UART
