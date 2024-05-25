@@ -10,13 +10,9 @@ build ./build/bin: mkdir
 cxx = g++
 cflags = -Wall -Wextra -Isource/common
 
-# Define a rule for compiling C++ source files
-rule cxx
-  command = $cxx $cflags -c $in -o $out
-  description = Compiling $in
-
 rule compile
-  command = cxx cflags -c $in -o $out
+  command = $cxx cflags -c $in -o $out
+  description = Compiling $in
  
 # List the source files
 src = source/test/testUART.cpp source/common/BPI_M2_ZERO_UART.cpp
