@@ -25,7 +25,11 @@ rule link
 build build/obj/BPI_M2_ZERO_UART.o: compile source/common/BPI_M2_ZERO_UART.cpp
 build build/obj/test_UART.o: compile source/test/test_UART.cpp
 
+build build/obj/BPI_M2_ZERO_UART.o: compile source/common/BPI_M2_ZERO_TCPIP.cpp
+build build/obj/test_UART.o: compile source/test/test_TCPIP.cpp
+
 build build/bin/test_UART: link build/obj/test_UART.o  build/obj/BPI_M2_ZERO_UART.o
+build build/bin/test_TCPIP: link build/obj/test_TCPIP.o  build/obj/BPI_M2_ZERO_TCPIP.o
 
 # Define the default target
-default build/bin/test_UART
+default build/bin/test_TCPIP
