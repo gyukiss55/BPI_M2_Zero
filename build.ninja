@@ -26,7 +26,7 @@ rule link
   command = $cxx $in -o $out
   description = Linking $out
 
-build build/obj/BPI_M2_ZERO_UART.o: compile source/test/BPI_M2_ZERO_UART.cpp
+build build/obj/BPI_M2_ZERO_UART.o: compile source/common/BPI_M2_ZERO_UART.cpp
 build build/obj/testUART.o: compile source/test/testUART.cpp
 
 build build/bin/testUART: link build/obj/testUART.o  build/obj/BPI_M2_ZERO_UART.o
