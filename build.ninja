@@ -11,7 +11,7 @@ cxx = g++
 cflags = -Wall -Wextra -Isource/common
 
 rule compile
-  command = $cxx cflags -c $in -o $out
+  command = $cxx $cflags -c $in -o $out
   description = Compiling $in
  
 # List the source files
