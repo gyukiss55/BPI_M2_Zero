@@ -1,0 +1,28 @@
+# build ninja
+
+rule mkdir
+  command = mkdir -p $out
+
+build ./build/obj: mkdir
+build ./build/bin: mkdir
+
+# Define compiler and compile flags
+cxx = g++
+cflags = -Wall -Wextra -Isource/common
+
+# Define a rule for compiling C++ source files
+rule cxx
+  command = $cxx $cflags -c $in -o $out
+  description = Compiling $in
+
+#rule compile
+#  command = g++ -Wall -c $in -o $out
+ 
+rule link
+  command = cxx $in -o $out
+
+
+build ./build/obj/BPI_M2_ZERO_UART.o: compile ./source/test/BPI_M2_ZERO_UART.cpp
+build ./build/obj/testUART.o: compile ./source/test/testUART.cpp
+
+build ./build/bin/testUART: link ./build/obj/testUART.o  ./build/obj/BPI_M2_ZERO_UART.o
