@@ -1,0 +1,110 @@
+Certainly! Below is a basic example of how you can handle I2C communication on a Banana Pi BPI-M2-Zero using C. This example will include initialization, reading, and writing data to an I2C device. For the I2C device, we'll use a generic sensor as an example.
+
+This example assumes that you have the necessary I2C headers and libraries installed on your BPI-M2-Zero. Typically, you can install them via `apt-get` if you're using a Debian-based distribution like Armbian.
+
+### Prerequisites
+1. Install the necessary I2C tools and libraries:
+   ```sh
+   sudo apt-get update
+   sudo apt-get install i2c-tools libi2c-dev
+   ```
+
+2. Enable I2C on the BPI-M2-Zero:
+   ```sh
+   sudo modprobe i2c-dev
+   ```
+
+### I2C Handling C Source Code
+
+Here's a basic example of C code to interact with an I2C device:
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <linux/i2c-dev.h>
+#include <sys/ioctl.h>
+
+#define I2C_DEVICE "/dev/i2c-1"  // Adjust the I2C bus number as needed
+#define I2C_ADDR 0x68            // Replace with your device's I2C address
+
+int i2c_write(int file, unsigned char reg, unsigned char value) {
+    unsigned char buf[2];
+    buf[0] = reg;
+    buf[1] = value;
+
+    if (write(file, buf, 2) != 2) {
+        perror("Failed to write to the i2c bus");
+        return -1;
+    }
+    return 0;
+}
+
+int i2c_read(int file, unsigned char reg, unsigned char *data) {
+    if (write(file, &reg, 1) != 1) {
+        perror("Failed to write to the i2c bus");
+        return -1;
+    }
+
+    if (read(file, data, 1) != 1) {
+        perror("Failed to read from the i2c bus");
+        return -1;
+    }
+    return 0;
+}
+
+int main() {
+    int file;
+    char *filename = (char*)I2C_DEVICE;
+
+    // Open the I2C device
+    if ((file = open(filename, O_RDWR)) < 0) {
+        perror("Failed to open the i2c bus");
+        exit(1);
+    }
+
+    // Specify the I2C address of the device we want to communicate with
+    if (ioctl(file, I2C_SLAVE, I2C_ADDR) < 0) {
+        perror("Failed to acquire bus access and/or talk to slave");
+        exit(1);
+    }
+
+    // Example: Write to a register
+    unsigned char reg = 0x00;   // Replace with the register you want to write to
+    unsigned char value = 0x12; // Replace with the value you want to write
+    if (i2c_write(file, reg, value) < 0) {
+        exit(1);
+    }
+
+    // Example: Read from a register
+    unsigned char read_data;
+    if (i2c_read(file, reg, &read_data) < 0) {
+        exit(1);
+    }
+
+    printf("Read value: 0x%02x\n", read_data);
+
+    // Close the I2C device
+    close(file);
+
+    return 0;
+}
+```
+
+### Explanation
+1. **Open the I2C device**: This is done using the `open` system call.
+2. **Set the I2C slave address**: Using the `ioctl` system call, we specify the address of the device we want to communicate with.
+3. **Write to the I2C device**: We send a register address followed by the data we want to write.
+4. **Read from the I2C device**: We send the register address we want to read from and then read the data from that register.
+5. **Error handling**: We handle possible errors that can occur during the I2C communication.
+
+### Compile and Run
+To compile and run this program:
+
+```sh
+gcc -o i2c_example i2c_example.c
+sudo ./i2c_example
+```
+
+Replace `i2c_example.c` with the name of your source file. This should compile and run the I2C example on your BPI-M2-Zero, assuming everything is correctly connected and the device is at the specified I2C address. Adjust the I2C bus and device addresses as needed for your specific setup.

@@ -1,0 +1,131 @@
+To get started with UART communication on a BPI-M2-Zero, you'll need to write some C code to handle the serial communication. Below is a simple example of how to set up UART communication on a BPI-M2-Zero using the termios library in C. This code initializes the UART, configures the port settings, and sends and receives data.
+
+### UART Example in C for BPI-M2-Zero
+
+1. **Set up the development environment**: Make sure you have the necessary development tools installed, including `gcc` and `make`.
+
+2. **Configure the UART pins**: Ensure that the UART pins are correctly configured. For the BPI-M2-Zero, UART1 is typically available on the GPIO header.
+
+3. **Write the UART C code**: Create a file named `uart_example.c` and add the following code:
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <termios.h>
+
+int uart_open(const char *portname) {
+    int fd = open(portname, O_RDWR | O_NOCTTY | O_SYNC);
+    if (fd < 0) {
+        printf("Error %d opening %s: %s\n", errno, portname, strerror(errno));
+        return -1;
+    }
+    return fd;
+}
+
+int uart_set_interface_attribs(int fd, int speed) {
+    struct termios tty;
+    if (tcgetattr(fd, &tty) != 0) {
+        printf("Error %d from tcgetattr\n", errno);
+        return -1;
+    }
+
+    cfsetospeed(&tty, speed);
+    cfsetispeed(&tty, speed);
+
+    tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8;     // 8-bit chars
+    tty.c_iflag &= ~IGNBRK;         // disable break processing
+    tty.c_lflag = 0;                // no signaling chars, no echo,
+                                    // no canonical processing
+    tty.c_oflag = 0;                // no remapping, no delays
+    tty.c_cc[VMIN]  = 1;            // read doesn't block
+    tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
+
+    tty.c_iflag &= ~(IXON | IXOFF | IXANY); // shut off xon/xoff ctrl
+
+    tty.c_cflag |= (CLOCAL | CREAD);// ignore modem controls,
+                                    // enable reading
+    tty.c_cflag &= ~(PARENB | PARODD);      // shut off parity
+    tty.c_cflag |= 0;
+    tty.c_cflag &= ~CSTOPB;
+    tty.c_cflag &= ~CRTSCTS;
+
+    if (tcsetattr(fd, TCSANOW, &tty) != 0) {
+        printf("Error %d from tcsetattr\n", errno);
+        return -1;
+    }
+    return 0;
+}
+
+void uart_close(int fd) {
+    close(fd);
+}
+
+int uart_write(int fd, const char *data) {
+    int len = strlen(data);
+    int written = write(fd, data, len);
+    if (written != len) {
+        printf("Error %d from write\n", errno);
+        return -1;
+    }
+    return 0;
+}
+
+int uart_read(int fd, char *buf, int buf_len) {
+    int rdlen = read(fd, buf, buf_len - 1);
+    if (rdlen > 0) {
+        buf[rdlen] = '\0';
+    } else if (rdlen < 0) {
+        printf("Error %d from read\n", errno);
+    }
+    return rdlen;
+}
+
+int main() {
+    const char *portname = "/dev/ttyS1"; // Adjust as per your UART port
+    int fd = uart_open(portname);
+    if (fd == -1) {
+        return -1;
+    }
+
+    if (uart_set_interface_attribs(fd, B115200) == -1) {
+        uart_close(fd);
+        return -1;
+    }
+
+    char *send_data = "Hello UART\n";
+    uart_write(fd, send_data);
+
+    char recv_buf[100];
+    int rdlen = uart_read(fd, recv_buf, sizeof(recv_buf));
+    if (rdlen > 0) {
+        printf("Received: %s\n", recv_buf);
+    }
+
+    uart_close(fd);
+    return 0;
+}
+```
+
+4. **Compile the code**: Use the following command to compile the code:
+
+```sh
+gcc -o uart_example uart_example.c
+```
+
+5. **Run the code**: Execute the compiled program with `sudo` to ensure it has the necessary permissions to access the UART port:
+
+```sh
+sudo ./uart_example
+```
+
+### Important Notes:
+
+- **UART Port**: The `portname` variable in the code should be set to the correct UART device file. For example, `/dev/ttyS1` or `/dev/ttyAMA0`, depending on your board configuration.
+- **Permissions**: Make sure the user has the necessary permissions to access the UART device. You might need to add the user to the `dialout` group or run the program with `sudo`.
+- **Baud Rate**: The `B115200` in the `uart_set_interface_attribs` function sets the baud rate to 115200. Adjust this value if you need a different baud rate.
+
+This code provides a basic framework for UART communication. Depending on your specific requirements, you might need to adjust the settings or add more functionality for error handling, data framing, etc.
