@@ -10,7 +10,7 @@
 
 
 #define PORT 8080
-#define SOCKET_BUFFER_SIZE 64000
+#define SOCKET_BUFFER_SIZE 65507
 
 int TCPIP_Server() {
     int server_fd, new_socket;
@@ -53,6 +53,8 @@ int TCPIP_Server() {
         exit(EXIT_FAILURE);
     }
 
+    std::cout << "BPI-M2-Zero server started, buffer size:" << SOCKET_BUFFER_SIZE << std::endl;
+
     while (true) {
         ssize_t valread = recv(new_socket, buffer, SOCKET_BUFFER_SIZE, 0);
         if (valread > 0) {
@@ -61,7 +63,7 @@ int TCPIP_Server() {
 
             sprintf("BPI-M2-Zero received %d data.", valread);
             send(new_socket, buffer, strlen(buffer), 0);
-            std::cout << "Hello message sent\n";
+            std::cout << "BPI-M2-Zero received:" << valread << std::endl;
         }
         else if (valread == 0) {
             std::cout << "Client disconnected" << std::endl;
