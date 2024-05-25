@@ -18,9 +18,6 @@ rule cxx
 rule compile
   command = gxx cflags -c $in -o $out
  
-rule link
-  command = cxx $in -o $out
-
 # List the source files
 src = source/test/testUART.cpp source/common/BPI_M2_ZERO_UART.cpp
 
